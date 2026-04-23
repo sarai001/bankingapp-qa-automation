@@ -1,0 +1,16 @@
+{
+  "loginValido": {
+    "username": "cliente1",
+    "password": "pass1234"
+  },
+
+  "loginInvalido": {
+    "username": "usuarioInvalido",
+    "password": "wrong"
+  },
+
+  "camposVacios": {
+    "username": "",
+    "password": ""
+  }
+}

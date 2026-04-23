@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BankingApp – FinanTrust</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #0B1F3A;
+    --navy-light: #162D50;
+    --accent: #00C896;
+    --accent2: #0080FF;
+    --danger: #E84855;
+    --warn: #F4A124;
+    --surface: #F5F7FA;
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --text: #0B1F3A;
+    --muted: #64748B;
+    --font-head: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--surface); color: var(--text); min-height: 100vh; }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ======= LOGIN SCREEN ======= */
+  #screen-login {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a3a6e 100%);
+    align-items: center; justify-content: center;
+  }
+  .login-box {
+    background: var(--card); border-radius: 20px; padding: 48px 40px;
+    width: 100%; max-width: 420px; box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+  }
+  .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+  .login-logo .logo-icon {
+    width: 44px; height: 44px; background: var(--navy); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-logo .logo-icon svg { width: 24px; height: 24px; fill: var(--accent); }
+  .login-logo span { font-family: var(--font-head); font-size: 22px; font-weight: 700; color: var(--navy); }
+  .login-title { font-family: var(--font-head); font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .login-sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 15px;
+    color: var(--text); background: var(--surface); transition: border-color .2s;
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent2); background: #fff; }
+  .btn-primary {
+    width: 100%; padding: 14px; background: var(--navy); color: #fff;
+    border: none; border-radius: var(--radius-sm); font-family: var(--font-head);
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: background .2s, transform .1s;
+    letter-spacing: .3px;
+  }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-primary:active { transform: scale(.98); }
+  .error-msg {
+    background: #FFF0F0; color: var(--danger); border: 1px solid #FFCDD0;
+    border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px;
+    margin-bottom: 16px; display: none;
+  }
+  .error-msg.show { display: block; }
+  .login-hint {
+    margin-top: 24px; padding: 14px; background: var(--surface);
+    border-radius: var(--radius-sm); border: 1px dashed var(--border);
+  }
+  .login-hint p { font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+  .login-hint code { font-size: 12px; color: var(--navy); background: var(--border); padding: 2px 6px; border-radius: 4px; }
+
+  /* OTP SCREEN */
+  #screen-otp { background: linear-gradient(135deg, var(--navy) 0%, #1a3a6e 100%); align-items: center; justify-content: center; }
+  .otp-box { background: var(--card); border-radius: 20px; padding: 48px 40px; width: 100%; max-width: 420px; text-align: center; }
+  .otp-icon { width: 64px; height: 64px; background: var(--surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+  .otp-inputs { display: flex; gap: 10px; justify-content: center; margin: 24px 0; }
+  .otp-inputs input {
+    width: 52px; height: 60px; text-align: center; font-size: 24px; font-weight: 700;
+    border: 2px solid var(--border); border-radius: var(--radius-sm);
+    font-family: var(--font-head); color: var(--navy); outline: none; transition: border-color .2s;
+  }
+  .otp-inputs input:focus { border-color: var(--accent2); }
+  .otp-hint { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .otp-code-display {
+    font-size: 13px; color: var(--muted); background: var(--surface);
+    padding: 8px 14px; border-radius: var(--radius-sm); display: inline-block; margin-bottom: 20px;
+  }
+  .otp-code-display strong { color: var(--navy); font-size: 15px; letter-spacing: 4px; }
+
+  /* ======= MAIN APP ======= */
+  #screen-app { background: var(--surface); }
+  .topbar {
+    background: var(--navy); padding: 0 32px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; }
+  .topbar-brand .logo-icon { width: 32px; height: 32px; background: rgba(255,255,255,.1); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .topbar-brand .logo-icon svg { width: 18px; height: 18px; fill: var(--accent); }
+  .topbar-brand span { font-family: var(--font-head); color: #fff; font-weight: 700; font-size: 17px; }
+  .topbar-user { display: flex; align-items: center; gap: 12px; }
+  .topbar-user span { color: rgba(255,255,255,.7); font-size: 13px; }
+  .topbar-user strong { color: #fff; }
+  .btn-logout {
+    background: rgba(255,255,255,.1); color: #fff; border: none;
+    border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+    font-family: var(--font-body); transition: background .2s;
+  }
+  .btn-logout:hover { background: rgba(255,255,255,.2); }
+
+  .app-nav {
+    background: var(--card); border-bottom: 1px solid var(--border);
+    display: flex; padding: 0 32px; overflow-x: auto; gap: 4px;
+  }
+  .nav-tab {
+    padding: 14px 18px; font-size: 14px; font-weight: 500; color: var(--muted);
+    cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap;
+    transition: color .2s, border-color .2s; border-radius: 0; background: none; border-left: none; border-top: none; border-right: none;
+  }
+  .nav-tab:hover { color: var(--navy); }
+  .nav-tab.active { color: var(--navy); border-bottom-color: var(--accent2); }
+
+  .app-content { padding: 28px 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+  /* TABS */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* DASHBOARD */
+  .welcome-banner {
+    background: var(--navy); border-radius: var(--radius); padding: 28px 32px;
+    margin-bottom: 24px; position: relative; overflow: hidden;
+  }
+  .welcome-banner::after {
+    content: ''; position: absolute; right: -40px; top: -40px;
+    width: 200px; height: 200px; background: rgba(0,200,150,.08);
+    border-radius: 50%;
+  }
+  .welcome-banner h2 { font-family: var(--font-head); color: #fff; font-size: 22px; margin-bottom: 4px; }
+  .welcome-banner p { color: rgba(255,255,255,.6); font-size: 14px; }
+  .welcome-banner .balance-chip {
+    margin-top: 16px; display: inline-block;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 20px; padding: 6px 16px; color: var(--accent); font-weight: 600; font-size: 13px;
+  }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--card); border-radius: var(--radius); padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .stat-card .label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .stat-card .value { font-family: var(--font-head); font-size: 26px; font-weight: 700; color: var(--navy); }
+  .stat-card .sub { font-size: 12px; color: var(--accent); margin-top: 4px; }
+
+  .txn-list { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .txn-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-family: var(--font-head); font-size: 15px; font-weight: 600; }
+  .txn-item { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); gap: 14px; }
+  .txn-item:last-child { border-bottom: none; }
+  .txn-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .txn-icon.in { background: #E8FFF6; }
+  .txn-icon.out { background: #FFF3F3; }
+  .txn-icon.pay { background: #EFF6FF; }
+  .txn-info { flex: 1; }
+  .txn-info .name { font-size: 14px; font-weight: 500; }
+  .txn-info .date { font-size: 12px; color: var(--muted); }
+  .txn-amount { font-family: var(--font-head); font-weight: 700; font-size: 15px; }
+  .txn-amount.in { color: var(--accent); }
+  .txn-amount.out { color: var(--danger); }
+  .txn-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .txn-badge.ok { background: #E8FFF6; color: #00A878; }
+  .txn-badge.pend { background: #FFF8EC; color: #C47D00; }
+
+  /* TRANSFER */
+  .section-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .form-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 28px; max-width: 540px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .btn-action {
+    padding: 13px 28px; background: var(--navy); color: #fff; border: none;
+    border-radius: var(--radius-sm); font-family: var(--font-head); font-size: 15px;
+    font-weight: 600; cursor: pointer; transition: background .2s; margin-top: 8px;
+  }
+  .btn-action:hover { background: var(--navy-light); }
+  .btn-action.green { background: var(--accent); color: var(--navy); }
+  .btn-action.green:hover { background: #00b085; }
+  .btn-action.red { background: var(--danger); }
+  .success-toast {
+    background: #E8FFF6; border: 1px solid #B2EDD9; border-radius: var(--radius-sm);
+    padding: 12px 16px; color: #00875A; font-size: 14px; margin-bottom: 16px;
+    display: none; align-items: center; gap: 10px;
+  }
+  .success-toast.show { display: flex; }
+  .err-toast {
+    background: #FFF0F0; border: 1px solid #FFCDD0; border-radius: var(--radius-sm);
+    padding: 12px 16px; color: var(--danger); font-size: 14px; margin-bottom: 16px;
+    display: none; align-items: center; gap: 10px;
+  }
+  .err-toast.show { display: flex; }
+
+  /* CLIENTS */
+  .clients-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .search-input { padding: 10px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font-body); width: 240px; outline: none; }
+  .search-input:focus { border-color: var(--accent2); }
+  .btn-sm {
+    padding: 10px 20px; background: var(--navy); color: #fff; border: none;
+    border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer;
+    font-family: var(--font-body); transition: background .2s;
+  }
+  .btn-sm:hover { background: var(--navy-light); }
+  .clients-table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .clients-table th { background: var(--surface); padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  .clients-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  .clients-table tr:last-child td { border-bottom: none; }
+  .clients-table tr:hover td { background: var(--surface); }
+  .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .status-badge.active { background: #E8FFF6; color: #00875A; }
+  .status-badge.inactive { background: #F1F5F9; color: var(--muted); }
+  .status-badge.blocked { background: #FFF0F0; color: var(--danger); }
+  .table-actions { display: flex; gap: 8px; }
+  .btn-icon { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: var(--font-body); }
+  .btn-icon.edit { background: #EFF6FF; color: var(--accent2); }
+  .btn-icon.del { background: #FFF0F0; color: var(--danger); }
+  .btn-icon:hover { opacity: .85; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 16px; padding: 32px; width: 100%;
+    max-width: 480px; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-cancel { padding: 12px 22px; background: var(--surface); color: var(--navy); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; font-family: var(--font-body); }
+  .btn-cancel:hover { background: var(--border); }
+
+  /* PAYMENTS */
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .service-card {
+    background: var(--card); border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 20px 16px; text-align: center; cursor: pointer; transition: border-color .2s, transform .1s;
+  }
+  .service-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+  .service-card.selected { border-color: var(--accent2); background: #EFF6FF; }
+  .service-card .s-icon { font-size: 28px; margin-bottom: 8px; }
+  .service-card .s-name { font-size: 13px; font-weight: 500; color: var(--navy); }
+  .service-card .s-code { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* SALDO */
+  .balance-card {
+    background: var(--navy); border-radius: var(--radius); padding: 32px;
+    color: #fff; max-width: 400px; margin-bottom: 24px;
+  }
+  .balance-card .bc-label { font-size: 13px; color: rgba(255,255,255,.6); margin-bottom: 8px; }
+  .balance-card .bc-amount { font-family: var(--font-head); font-size: 40px; font-weight: 700; color: var(--accent); }
+  .balance-card .bc-account { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 12px; letter-spacing: 2px; }
+
+  /* HISTORIAL */
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-btn { padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 13px; cursor: pointer; background: var(--card); color: var(--muted); font-family: var(--font-body); transition: all .2s; }
+  .filter-btn.active, .filter-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--surface); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .app-content { padding: 16px; }
+    .topbar { padding: 0 16px; }
+    .app-nav { padding: 0 16px; }
+    .form-row { grid-template-columns: 1fr; }
+    .login-box { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="screen-login" class="screen active">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22" style="fill:none;stroke:#00C896;stroke-width:1.5"/></svg>
+      </div>
+      <span>FinanTrust</span>
+    </div>
+    <div class="login-title">Bienvenido</div>
+    <div class="login-sub">Ingrese sus credenciales para continuar</div>
+
+    <div id="login-error" class="error-msg" data-testid="error-message">Usuario o contraseña incorrectos.</div>
+
+    <div class="form-group">
+      <label for="username">Usuario</label>
+      <input type="text" id="username" data-testid="username" placeholder="ej. admin" autocomplete="off"/>
+    </div>
+    <div class="form-group">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" data-testid="password" placeholder="••••••••"/>
+    </div>
+    <button class="btn-primary" data-testid="btn-login" onclick="doLogin()">Iniciar sesión</button>
+
+    <div class="login-hint">
+      <p>Usuarios de prueba:</p>
+      <p><code>admin</code> / <code>admin123</code> — Administrador</p>
+      <p><code>cliente1</code> / <code>pass1234</code> — Cliente estándar</p>
+      <p><code>bloqueado</code> / <code>block999</code> — Cuenta bloqueada</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== OTP ===== -->
+<div id="screen-otp" class="screen">
+  <div class="otp-box">
+    <div class="otp-icon">🔐</div>
+    <h2 style="font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:8px;">Verificación OTP</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:4px;">Ingrese el código enviado a su dispositivo registrado.</p>
+    <div class="otp-code-display">Código de prueba: <strong id="otp-display">------</strong></div>
+    <div class="otp-inputs">
+      <input type="text" maxlength="1" class="otp-digit" data-testid="otp-1" id="otp1"/>
+      <input type="text" maxlength="1" class="otp-digit" data-testid="otp-2" id="otp2"/>
+      <input type="text" maxlength="1" class="otp-digit" data-testid="otp-3" id="otp3"/>
+      <input type="text" maxlength="1" class="otp-digit" data-testid="otp-4" id="otp4"/>
+      <input type="text" maxlength="1" class="otp-digit" data-testid="otp-5" id="otp5"/>
+      <input type="text" maxlength="1" class="otp-digit" data-testid="otp-6" id="otp6"/>
+    </div>
+    <div id="otp-error" class="error-msg" style="display:none;" data-testid="otp-error">Código incorrecto. Inténtelo de nuevo.</div>
+    <button class="btn-primary" data-testid="btn-verify-otp" onclick="verifyOTP()">Verificar</button>
+    <p style="font-size:13px;color:var(--muted);margin-top:16px;cursor:pointer;" onclick="location.reload()">← Volver al inicio de sesión</p>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="screen-app" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22" style="fill:none;stroke:#00C896;stroke-width:1.5"/></svg>
+      </div>
+      <span>BankingApp</span>
+    </div>
+    <div class="topbar-user">
+      <span>Hola, <strong id="user-display">—</strong></span>
+      <button class="btn-logout" data-testid="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="app-nav">
+    <button class="nav-tab active" data-testid="tab-dashboard" onclick="switchTab('dashboard', this)">Panel</button>
+    <button class="nav-tab" data-testid="tab-saldo" onclick="switchTab('saldo', this)">Mi Saldo</button>
+    <button class="nav-tab" data-testid="tab-transfer" onclick="switchTab('transfer', this)">Transferencias</button>
+    <button class="nav-tab" data-testid="tab-pagos" onclick="switchTab('pagos', this)">Pagos</button>
+    <button class="nav-tab" data-testid="tab-historial" onclick="switchTab('historial', this)">Historial</button>
+    <button class="nav-tab" id="tab-clientes-btn" data-testid="tab-clientes" onclick="switchTab('clientes', this)">Clientes</button>
+  </div>
+
+  <div class="app-content">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab-panel active">
+      <div class="welcome-banner">
+        <h2 data-testid="welcome-title">Bienvenido, <span id="welcome-name">—</span></h2>
+        <p>Su banca digital segura y disponible 24/7</p>
+        <div class="balance-chip" data-testid="balance-chip">Saldo: <span id="balance-top">$0.00</span></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card" data-testid="stat-ingresos">
+          <div class="label">Ingresos del mes</div>
+          <div class="value" id="stat-ingresos">$0</div>
+          <div class="sub">↑ Este mes</div>
+        </div>
+        <div class="stat-card" data-testid="stat-egresos">
+          <div class="label">Egresos del mes</div>
+          <div class="value" id="stat-egresos">$0</div>
+          <div class="sub" style="color:var(--danger);">↓ Este mes</div>
+        </div>
+        <div class="stat-card" data-testid="stat-txn">
+          <div class="label">Transacciones</div>
+          <div class="value" id="stat-txn">0</div>
+          <div class="sub">Últimos 30 días</div>
+        </div>
+        <div class="stat-card" data-testid="stat-clientes">
+          <div class="label">Clientes activos</div>
+          <div class="value" id="stat-clientes">0</div>
+          <div class="sub">En el sistema</div>
+        </div>
+      </div>
+      <div class="txn-list">
+        <div class="txn-header">Últimas transacciones</div>
+        <div id="recent-txns"></div>
+      </div>
+    </div>
+
+    <!-- SALDO -->
+    <div id="tab-saldo" class="tab-panel">
+      <div class="section-title">Mi Saldo</div>
+      <div class="balance-card" data-testid="balance-card">
+        <div class="bc-label">Saldo disponible</div>
+        <div class="bc-amount" id="balance-display" data-testid="balance-amount">$0.00</div>
+        <div class="bc-account" id="account-number" data-testid="account-number">CR12 0000 0000 0000 0000</div>
+      </div>
+      <div class="txn-list" style="max-width:600px;">
+        <div class="txn-header">Movimientos recientes</div>
+        <div id="saldo-txns"></div>
+      </div>
+    </div>
+
+    <!-- TRANSFERENCIAS -->
+    <div id="tab-transfer" class="tab-panel">
+      <div class="section-title">Nueva Transferencia</div>
+      <div id="transfer-success" class="success-toast" data-testid="transfer-success">✓ Transferencia realizada con éxito</div>
+      <div id="transfer-error" class="err-toast" data-testid="transfer-error">⚠ Error al procesar la transferencia</div>
+      <div class="form-card">
+        <div class="form-group">
+          <label for="t-cuenta-origen">Cuenta origen</label>
+          <select id="t-cuenta-origen" data-testid="transfer-cuenta-origen">
+            <option value="">Seleccione una cuenta</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="t-cuenta-destino">Cuenta destino</label>
+          <input type="text" id="t-cuenta-destino" data-testid="transfer-cuenta-destino" placeholder="Ej. CR21 1234 5678 9012 3456"/>
+        </div>
+        <div class="form-group">
+          <label for="t-beneficiario">Nombre del beneficiario</label>
+          <input type="text" id="t-beneficiario" data-testid="transfer-beneficiario" placeholder="Nombre completo"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="t-monto">Monto (USD)</label>
+            <input type="number" id="t-monto" data-testid="transfer-monto" placeholder="0.00" min="1"/>
+          </div>
+          <div class="form-group">
+            <label for="t-tipo">Tipo</label>
+            <select id="t-tipo" data-testid="transfer-tipo">
+              <option value="SINPE">SINPE Móvil</option>
+              <option value="IBAN">Transferencia IBAN</option>
+              <option value="SWIFT">Internacional SWIFT</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="t-descripcion">Descripción (opcional)</label>
+          <input type="text" id="t-descripcion" data-testid="transfer-descripcion" placeholder="Motivo de la transferencia"/>
+        </div>
+        <button class="btn-action" data-testid="btn-transferir" onclick="doTransfer()">Realizar transferencia</button>
+      </div>
+    </div>
+
+    <!-- PAGOS -->
+    <div id="tab-pagos" class="tab-panel">
+      <div class="section-title">Pago de Servicios</div>
+      <div id="pago-success" class="success-toast" data-testid="pago-success">✓ Pago realizado con éxito</div>
+      <div id="pago-error" class="err-toast" data-testid="pago-error">⚠ Error al procesar el pago</div>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:20px;">Seleccione el servicio a pagar:</p>
+      <div class="services-grid" id="services-grid"></div>
+      <div class="form-card" id="pago-form" style="display:none;">
+        <div class="section-title" id="pago-servicio-title" style="font-size:16px;"></div>
+        <div class="form-group">
+          <label for="p-numero">Número de contrato / referencia</label>
+          <input type="text" id="p-numero" data-testid="pago-numero" placeholder="Ej. 1234567"/>
+        </div>
+        <div class="form-group">
+          <label for="p-monto">Monto a pagar</label>
+          <input type="number" id="p-monto" data-testid="pago-monto" placeholder="0.00" min="1"/>
+        </div>
+        <div class="form-group">
+          <label for="p-cuenta">Cuenta de débito</label>
+          <select id="p-cuenta" data-testid="pago-cuenta">
+            <option value="">Seleccione una cuenta</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="btn-action green" data-testid="btn-pagar" onclick="doPago()">Pagar</button>
+          <button class="btn-cancel" onclick="cancelPago()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div id="tab-historial" class="tab-panel">
+      <div class="section-title">Historial de Transacciones</div>
+      <div class="filter-bar">
+        <button class="filter-btn active" data-testid="filter-all" onclick="filterHistory('all', this)">Todas</button>
+        <button class="filter-btn" data-testid="filter-transfer" onclick="filterHistory('transfer', this)">Transferencias</button>
+        <button class="filter-btn" data-testid="filter-pago" onclick="filterHistory('pago', this)">Pagos</button>
+        <button class="filter-btn" data-testid="filter-ingreso" onclick="filterHistory('ingreso', this)">Ingresos</button>
+      </div>
+      <div class="txn-list" id="historial-list"></div>
+    </div>
+
+    <!-- CLIENTES (solo admin) -->
+    <div id="tab-clientes" class="tab-panel">
+      <div class="clients-toolbar">
+        <div class="section-title" style="margin:0;">Gestión de Clientes</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="text" class="search-input" id="client-search" data-testid="client-search" placeholder="Buscar cliente..." oninput="renderClients()"/>
+          <button class="btn-sm" data-testid="btn-add-client" onclick="openAddClient()">+ Agregar cliente</button>
+        </div>
+      </div>
+      <div id="clients-table-wrap">
+        <table class="clients-table" data-testid="clients-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Tipo</th><th>Estado</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="clients-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL AGREGAR/EDITAR CLIENTE -->
+<div class="modal-overlay" id="modal-client" data-testid="modal-client">
+  <div class="modal">
+    <div class="modal-title" id="modal-client-title">Agregar Cliente</div>
+    <div class="form-group">
+      <label>Nombre completo</label>
+      <input type="text" id="c-nombre" data-testid="client-nombre" placeholder="Nombre apellido"/>
+    </div>
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" id="c-correo" data-testid="client-correo" placeholder="correo@ejemplo.com"/>
+    </div>
+    <div class="form-group">
+      <label>Teléfono</label>
+      <input type="text" id="c-telefono" data-testid="client-telefono" placeholder="8888-8888"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipo de cliente</label>
+        <select id="c-tipo" data-testid="client-tipo">
+          <option value="Personal">Personal</option>
+          <option value="Empresarial">Empresarial</option>
+          <option value="Premium">Premium</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="c-estado" data-testid="client-estado">
+          <option value="active">Activo</option>
+          <option value="inactive">Inactivo</option>
+          <option value="blocked">Bloqueado</option>
+        </select>
+      </div>
+    </div>
+    <div id="modal-client-error" class="error-msg" data-testid="modal-client-error"></div>
+    <div class="modal-footer">
+      <button class="btn-action" data-testid="btn-save-client" onclick="saveClient()">Guardar</button>
+      <button class="btn-cancel" data-testid="btn-cancel-client" onclick="closeModal('modal-client')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div class="modal-overlay" id="modal-delete" data-testid="modal-delete">
+  <div class="modal" style="max-width:360px;text-align:center;">
+    <div style="font-size:40px;margin-bottom:12px;">🗑️</div>
+    <div class="modal-title">¿Eliminar cliente?</div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px;">Esta acción no se puede deshacer.</p>
+    <div class="modal-footer" style="justify-content:center;">
+      <button class="btn-action red" data-testid="btn-confirm-delete" onclick="confirmDelete()">Eliminar</button>
+      <button class="btn-cancel" data-testid="btn-cancel-delete" onclick="closeModal('modal-delete')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const USERS = {
+  admin:    { pass:'admin123', name:'Administrador', role:'admin',   balance:125000.00, account:'CR12 1001 0000 4321 9876' },
+  cliente1: { pass:'pass1234', name:'Carlos Morales', role:'client', balance:8432.50,   account:'CR21 1508 0001 2345 6789' },
+  bloqueado:{ pass:'block999', name:'Cuenta Bloqueada', role:'blocked', balance:0, account:'CR00 0000 0000 0000 0000' }
+};
+
+let currentUser = null;
+let otpCode = '';
+let editingClientId = null;
+let deletingClientId = null;
+let selectedService = null;
+let historyFilter = 'all';
+
+let clients = [
+  { id:1, nombre:'Ana Pérez López',    correo:'ana.perez@email.com',    telefono:'8881-1234', tipo:'Personal',    estado:'active'   },
+  { id:2, nombre:'Empresa Tech S.A.',  correo:'contacto@techsa.com',    telefono:'2220-5555', tipo:'Empresarial', estado:'active'   },
+  { id:3, nombre:'Luis Vargas Mora',   correo:'lvargas@email.com',      telefono:'7777-8888', tipo:'Premium',     estado:'active'   },
+  { id:4, nombre:'María Solano Ruiz',  correo:'msolano@personal.com',   telefono:'8890-0011', tipo:'Personal',    estado:'inactive' },
+  { id:5, nombre:'IndusCorp Ltda.',    correo:'info@induscorp.com',     telefono:'2221-9900', tipo:'Empresarial', estado:'blocked'  },
+];
+let nextClientId = 6;
+
+let transactions = [
+  { id:1, tipo:'ingreso',   nombre:'Depósito inicial',        fecha:'2025-06-01', monto:5000.00  },
+  { id:2, tipo:'transfer',  nombre:'Juan Ramírez',            fecha:'2025-06-03', monto:-320.00  },
+  { id:3, tipo:'pago',      nombre:'Pago Eléctrica Nacional', fecha:'2025-06-05', monto:-89.50   },
+  { id:4, tipo:'ingreso',   nombre:'Transferencia recibida',  fecha:'2025-06-08', monto:1500.00  },
+  { id:5, tipo:'pago',      nombre:'Pago AyA Agua',           fecha:'2025-06-10', monto:-45.00   },
+  { id:6, tipo:'transfer',  nombre:'Sofía Castro',            fecha:'2025-06-12', monto:-200.00  },
+];
+let nextTxnId = 7;
+
+const SERVICES = [
+  { id:'elec', name:'Electricidad',  icon:'⚡', code:'ELEC-001' },
+  { id:'agua', name:'Agua',          icon:'💧', code:'AYA-001'  },
+  { id:'inet', name:'Internet',      icon:'🌐', code:'NET-001'  },
+  { id:'tel',  name:'Teléfono',      icon:'📞', code:'TEL-001'  },
+  { id:'gas',  name:'Gas',           icon:'🔥', code:'GAS-001'  },
+  { id:'tv',   name:'Cable/TV',      icon:'📺', code:'CAB-001'  },
+];
+
+function show(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+function doLogin() {
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  const err = document.getElementById('login-error');
+  err.classList.remove('show');
+  if (!USERS[u] || USERS[u].pass !== p) { err.classList.add('show'); return; }
+  if (USERS[u].role === 'blocked') { err.textContent = 'Su cuenta está bloqueada. Contacte a soporte.'; err.classList.add('show'); return; }
+  currentUser = { username: u, ...USERS[u] };
+  otpCode = String(Math.floor(100000 + Math.random() * 900000));
+  document.getElementById('otp-display').textContent = otpCode;
+  document.querySelectorAll('.otp-digit').forEach(i => i.value = '');
+  show('screen-otp');
+  setTimeout(() => document.getElementById('otp1').focus(), 100);
+}
+
+function verifyOTP() {
+  const entered = ['otp1','otp2','otp3','otp4','otp5','otp6'].map(id => document.getElementById(id).value).join('');
+  const err = document.getElementById('otp-error');
+  if (entered !== otpCode) { err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  initApp();
+  show('screen-app');
+}
+
+function initApp() {
+  document.getElementById('user-display').textContent = currentUser.name;
+  document.getElementById('welcome-name').textContent = currentUser.name;
+  const bal = currentUser.balance.toLocaleString('es-CR', {style:'currency', currency:'USD'});
+  document.getElementById('balance-top').textContent = bal;
+  document.getElementById('balance-display').textContent = bal;
+  document.getElementById('account-number').textContent = currentUser.account;
+
+  // stats
+  const ingresos = transactions.filter(t=>t.monto>0).reduce((a,t)=>a+t.monto,0);
+  const egresos  = transactions.filter(t=>t.monto<0).reduce((a,t)=>a+Math.abs(t.monto),0);
+  document.getElementById('stat-ingresos').textContent = '$'+ingresos.toLocaleString('es-CR');
+  document.getElementById('stat-egresos').textContent  = '$'+egresos.toLocaleString('es-CR');
+  document.getElementById('stat-txn').textContent      = transactions.length;
+  document.getElementById('stat-clientes').textContent = clients.filter(c=>c.estado==='active').length;
+
+  // show/hide admin tab
+  document.getElementById('tab-clientes-btn').style.display = currentUser.role === 'admin' ? 'block' : 'none';
+
+  // populate selects
+  ['t-cuenta-origen','p-cuenta'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">Seleccione una cuenta</option><option value="'+currentUser.account+'">'+currentUser.account+'</option>';
+  });
+
+  renderRecentTxns();
+  renderSaldoTxns();
+  renderHistorial();
+  renderClients();
+  renderServices();
+}
+
+function renderRecentTxns() {
+  const el = document.getElementById('recent-txns');
+  el.innerHTML = transactions.slice(-4).reverse().map(t => txnHTML(t)).join('');
+}
+function renderSaldoTxns() {
+  const el = document.getElementById('saldo-txns');
+  el.innerHTML = transactions.slice().reverse().map(t => txnHTML(t)).join('');
+}
+function renderHistorial() {
+  const el = document.getElementById('historial-list');
+  const filtered = historyFilter === 'all' ? transactions : transactions.filter(t => t.tipo === historyFilter);
+  if (!filtered.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px;">No hay transacciones.</div>'; return; }
+  el.innerHTML = filtered.slice().reverse().map(t => txnHTML(t)).join('');
+}
+
+function txnHTML(t) {
+  const isIn = t.monto > 0;
+  const icons = { ingreso:'💰', transfer:'↔️', pago:'🧾' };
+  const amt = (isIn ? '+' : '') + t.monto.toLocaleString('es-CR', {style:'currency',currency:'USD'});
+  return `<div class="txn-item" data-testid="txn-item-${t.id}">
+    <div class="txn-icon ${isIn?'in':'out'}">${icons[t.tipo]||'💳'}</div>
+    <div class="txn-info"><div class="name">${t.nombre}</div><div class="date">${t.fecha}</div></div>
+    <span class="txn-amount ${isIn?'in':'out'}" data-testid="txn-amount-${t.id}">${amt}</span>
+    <span class="txn-badge ok" data-testid="txn-status-${t.id}">Completado</span>
+  </div>`;
+}
+
+function filterHistory(type, btn) {
+  historyFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistorial();
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function doTransfer() {
+  const origen   = document.getElementById('t-cuenta-origen').value;
+  const destino  = document.getElementById('t-cuenta-destino').value.trim();
+  const benef    = document.getElementById('t-beneficiario').value.trim();
+  const monto    = parseFloat(document.getElementById('t-monto').value);
+  const tipo     = document.getElementById('t-tipo').value;
+  const desc     = document.getElementById('t-descripcion').value.trim();
+  const ok = document.getElementById('transfer-success');
+  const err = document.getElementById('transfer-error');
+  ok.classList.remove('show'); err.classList.remove('show');
+
+  if (!origen || !destino || !benef || !monto || monto <= 0) { err.textContent = '⚠ Complete todos los campos obligatorios.'; err.classList.add('show'); return; }
+  if (monto > currentUser.balance) { err.textContent = '⚠ Saldo insuficiente para realizar la transferencia.'; err.classList.add('show'); return; }
+
+  currentUser.balance -= monto;
+  transactions.push({ id: nextTxnId++, tipo:'transfer', nombre: benef + (desc?' – '+desc:''), fecha: new Date().toISOString().slice(0,10), monto: -monto });
+  ok.classList.add('show');
+  document.getElementById('t-cuenta-destino').value = '';
+  document.getElementById('t-beneficiario').value = '';
+  document.getElementById('t-monto').value = '';
+  document.getElementById('t-descripcion').value = '';
+  renderRecentTxns(); renderSaldoTxns(); renderHistorial();
+  const bal = currentUser.balance.toLocaleString('es-CR', {style:'currency',currency:'USD'});
+  document.getElementById('balance-top').textContent = bal;
+  document.getElementById('balance-display').textContent = bal;
+}
+
+function renderServices() {
+  const grid = document.getElementById('services-grid');
+  grid.innerHTML = SERVICES.map(s =>
+    `<div class="service-card" data-testid="service-${s.id}" onclick="selectService('${s.id}')">
+      <div class="s-icon">${s.icon}</div>
+      <div class="s-name">${s.name}</div>
+      <div class="s-code">${s.code}</div>
+    </div>`
+  ).join('');
+}
+
+function selectService(id) {
+  selectedService = SERVICES.find(s=>s.id===id);
+  document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelector('[data-testid="service-'+id+'"]').classList.add('selected');
+  document.getElementById('pago-servicio-title').textContent = selectedService.icon + ' Pago de ' + selectedService.name;
+  document.getElementById('pago-form').style.display = 'block';
+  document.getElementById('p-numero').value = '';
+  document.getElementById('p-monto').value = '';
+}
+function cancelPago() { document.getElementById('pago-form').style.display='none'; document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected')); selectedService=null; }
+
+function doPago() {
+  const num   = document.getElementById('p-numero').value.trim();
+  const monto = parseFloat(document.getElementById('p-monto').value);
+  const cuenta= document.getElementById('p-cuenta').value;
+  const ok = document.getElementById('pago-success');
+  const err= document.getElementById('pago-error');
+  ok.classList.remove('show'); err.classList.remove('show');
+  if (!num || !monto || monto<=0 || !cuenta) { err.textContent='⚠ Complete todos los campos.'; err.classList.add('show'); return; }
+  if (monto > currentUser.balance) { err.textContent='⚠ Saldo insuficiente.'; err.classList.add('show'); return; }
+  currentUser.balance -= monto;
+  transactions.push({ id:nextTxnId++, tipo:'pago', nombre:'Pago '+selectedService.name+' #'+num, fecha:new Date().toISOString().slice(0,10), monto:-monto });
+  ok.classList.add('show');
+  cancelPago();
+  renderRecentTxns(); renderSaldoTxns(); renderHistorial();
+  const bal = currentUser.balance.toLocaleString('es-CR',{style:'currency',currency:'USD'});
+  document.getElementById('balance-top').textContent = bal;
+  document.getElementById('balance-display').textContent = bal;
+}
+
+function renderClients() {
+  const q = (document.getElementById('client-search')||{value:''}).value.toLowerCase();
+  const filtered = clients.filter(c => !q || c.nombre.toLowerCase().includes(q) || c.correo.toLowerCase().includes(q));
+  const tbody = document.getElementById('clients-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = filtered.map(c => `
+    <tr data-testid="client-row-${c.id}">
+      <td data-testid="client-id-${c.id}">${c.id}</td>
+      <td data-testid="client-nombre-${c.id}"><strong>${c.nombre}</strong></td>
+      <td data-testid="client-correo-${c.id}">${c.correo}</td>
+      <td>${c.telefono}</td>
+      <td>${c.tipo}</td>
+      <td><span class="status-badge ${c.estado}" data-testid="client-estado-${c.id}">${{active:'Activo',inactive:'Inactivo',blocked:'Bloqueado'}[c.estado]}</span></td>
+      <td><div class="table-actions">
+        <button class="btn-icon edit" data-testid="btn-edit-${c.id}" onclick="openEditClient(${c.id})">Editar</button>
+        <button class="btn-icon del" data-testid="btn-delete-${c.id}" onclick="openDeleteClient(${c.id})">Eliminar</button>
+      </div></td>
+    </tr>`).join('');
+  document.getElementById('stat-clientes').textContent = clients.filter(c=>c.estado==='active').length;
+}
+
+function openAddClient() {
+  editingClientId = null;
+  document.getElementById('modal-client-title').textContent = 'Agregar Cliente';
+  ['c-nombre','c-correo','c-telefono'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('c-tipo').value='Personal';
+  document.getElementById('c-estado').value='active';
+  document.getElementById('modal-client-error').classList.remove('show');
+  document.getElementById('modal-client').classList.add('open');
+}
+function openEditClient(id) {
+  editingClientId = id;
+  const c = clients.find(x=>x.id===id);
+  document.getElementById('modal-client-title').textContent = 'Editar Cliente';
+  document.getElementById('c-nombre').value   = c.nombre;
+  document.getElementById('c-correo').value   = c.correo;
+  document.getElementById('c-telefono').value = c.telefono;
+  document.getElementById('c-tipo').value     = c.tipo;
+  document.getElementById('c-estado').value   = c.estado;
+  document.getElementById('modal-client-error').classList.remove('show');
+  document.getElementById('modal-client').classList.add('open');
+}
+function saveClient() {
+  const nombre   = document.getElementById('c-nombre').value.trim();
+  const correo   = document.getElementById('c-correo').value.trim();
+  const telefono = document.getElementById('c-telefono').value.trim();
+  const tipo     = document.getElementById('c-tipo').value;
+  const estado   = document.getElementById('c-estado').value;
+  const errEl    = document.getElementById('modal-client-error');
+  errEl.classList.remove('show');
+  if (!nombre || !correo || !telefono) { errEl.textContent='Complete todos los campos obligatorios.'; errEl.classList.add('show'); return; }
+  if (!correo.includes('@')) { errEl.textContent='Ingrese un correo válido.'; errEl.classList.add('show'); return; }
+  if (editingClientId) {
+    const c = clients.find(x=>x.id===editingClientId);
+    Object.assign(c, {nombre, correo, telefono, tipo, estado});
+  } else {
+    clients.push({ id:nextClientId++, nombre, correo, telefono, tipo, estado });
+  }
+  closeModal('modal-client');
+  renderClients();
+}
+function openDeleteClient(id) { deletingClientId=id; document.getElementById('modal-delete').classList.add('open'); }
+function confirmDelete() { clients=clients.filter(c=>c.id!==deletingClientId); closeModal('modal-delete'); renderClients(); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function doLogout() { currentUser=null; otpCode=''; document.getElementById('username').value=''; document.getElementById('password').value=''; document.getElementById('login-error').classList.remove('show'); show('screen-login'); switchTab('dashboard', document.querySelector('[data-testid="tab-dashboard"]')); }
+
+// OTP auto-advance
+document.querySelectorAll('.otp-digit').forEach((inp, i, arr) => {
+  inp.addEventListener('input', () => { if(inp.value && i<arr.length-1) arr[i+1].focus(); });
+  inp.addEventListener('keydown', e => { if(e.key==='Backspace' && !inp.value && i>0) arr[i-1].focus(); });
+});
+document.addEventListener('keydown', e => { if(e.key==='Enter') { if(document.getElementById('screen-login').classList.contains('active')) doLogin(); else if(document.getElementById('screen-otp').classList.contains('active')) verifyOTP(); } });
+</script>
+</body>
+</html>

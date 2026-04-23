@@ -1,0 +1,13 @@
+{
+  "cliente1": {
+    "username": "cliente1",
+    "password": "pass1234",
+    "name": "Carlos Morales",
+    "balance": "8432.50"
+  },
+
+  "admin": {
+    "username": "admin",
+    "password": "admin123"
+  }
+}

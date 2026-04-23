@@ -1,0 +1,9 @@
+{
+  "nuevoCliente": {
+    "name": "Nuevo Cliente Test",
+    "email": "nuevo.cliente@test.com",
+    "phone": "1111-2222",
+    "type": "Personal",
+    "status": "active"
+  }
+}

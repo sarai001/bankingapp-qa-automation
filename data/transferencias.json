@@ -1,0 +1,15 @@
+{
+  "transferenciaValida": {
+    "destination": "CR99 8765 4321 0987 6543",
+    "beneficiary": "Beneficiario Test",
+    "amount": "100",
+    "description": "Pago de prueba"
+  },
+
+  "transferenciaInvalida": {
+    "destination": "CR99 8765 4321 0987 6543",
+    "beneficiary": "Beneficiario Test",
+    "amount": "9000",
+    "description": "Transferencia grande"
+  }
+}
